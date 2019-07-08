@@ -116,13 +116,19 @@ tribonacci :: Integer -> Integer
 tribonacci 1 = 1
 tribonacci 2 = 1
 tribonacci 3 = 2
-tribonacci n = tribonacci n + tribonacci (n-1) + tribonacci (n-2)
+tribonacci n = tribonacci (n-1) + tribonacci (n-2) + tribonacci (n-3)
 
 -- Ex 13: implement the euclidean algorithm for finding the greatest
 -- common divisor: http://en.wikipedia.org/wiki/Euclidean_algorithm
 
 myGcd :: Integer -> Integer -> Integer
-myGcd = undefined
+myGcd x 0 = x
+myGcd 0 x = x
+myGcd x y = 
+	let (x1,y1) = if x > y then (x, y) else (y, x)
+	    r1 = x1 `mod` y1
+	in
+		myGcd r1 y1
 
 -- Ex 14: The Haskell Prelude (standard library) defines the type
 -- Ordering with values LT, GT and EQ. You try out Ordering by
@@ -141,7 +147,9 @@ myGcd = undefined
 -- 2. Within even and odd numbers the ordering is normal
 
 funnyCompare :: Int -> Int -> Ordering
-funnyCompare = undefined
+funnyCompare x y | x `mod` 2 == 0 && y `mod` 2 /= 0 = LT
+				 | y `mod` 2 == 0 && x `mod` 2 /= 0 = GT
+				 | True = compare x y
 
 -- Ex 15: Implement the function funnyMin that returns the minimum of
 -- its two arguments, according to the ordering implemented by
@@ -152,7 +160,11 @@ funnyCompare = undefined
 -- expression or define a helper function.
 
 funnyMin :: Int -> Int -> Int
-funnyMin = undefined
+funnyMin x y = 
+	case funnyCompare x y of
+	  LT -> x
+	  GT -> y
+	  EQ -> x
 
 -- Ex 16: implement the recursive function pyramid that returns
 -- strings like this:
@@ -166,9 +178,18 @@ funnyMin = undefined
 -- * you can glue strings together with the operator ++
 -- * the function show transforms a number into a string
 -- * you'll need a (recursive) helper function
+mkString :: Show a => [a] -> String
+mkString [] = ""
+mkString (x:[])  = show(x)
+mkString (x:xs)  = show(x) ++ "," ++ mkString(xs)
 
 pyramid :: Integer -> String
-pyramid = undefined
+pyramid 0 = "0"
+pyramid x = 
+	let leftSide = [0..x-1]
+	    rightSide = reverse(leftSide)
+	in 
+		mkString(leftSide) ++ "," ++ show(x) ++ ","  ++ mkString(rightSide)
 
 -- Ex 17: implement the function smallestDivisor that returns the
 -- smallest number (greater than 1) that divides the given number.
@@ -182,8 +203,13 @@ pyramid = undefined
 -- Ps. your function doesn't need to work for inputs 0 and 1, but
 -- remember this in the next exercise!
 
+hellp i n = 
+	if( i >= n) 
+		then n 
+	else if (n `mod` i == 0)  then i else hellp (i+1) n
+
 smallestDivisor :: Integer -> Integer
-smallestDivisor = undefined
+smallestDivisor x = if(x `mod` 2 == 0) then 2 else hellp 3 x
 
 -- Ex 18: implement a function isPrime that checks if the given number
 -- is a prime number. Use the function smallestDivisor.
@@ -191,11 +217,11 @@ smallestDivisor = undefined
 -- Ps. 0 and 1 are not prime numbers
 
 isPrime :: Integer -> Bool
-isPrime = undefined
-
+isPrime 1 = False
+isPrime x = smallestDivisor x == x
 -- Ex 19: implement a function nextPrime that returns the first prime
 -- number that comes after the given number. Use the function isPrime
 -- you just defined.
 
 nextPrime :: Integer -> Integer
-nextPrime = undefined
+nextPrime x = if(isPrime (x+1)) then x+1 else nextPrime (x+1)
